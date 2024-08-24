@@ -57,6 +57,7 @@ TARGET_DIR="$FILES_DIR/packed"
 # Default value for KEEP_UNPACKED_FILES
 KEEP_UNPACKED_FILES="false"
 
+# Creates the directory for packed files
 mkdir -p "$TARGET_DIR"
 
 # Iterate over each .abi file in the directory
@@ -85,8 +86,15 @@ for abi_file in "$FILES_DIR"/*.abi; do
   echo " >> Generated $output_file"
 done
 
+# If there is no flag to keep the original files, it removes them
 if [ "$KEEP_UNPACKED_FILES" == "false" ]; then
+
+  # Delete the original files
   find "$FILES_DIR" -maxdepth 1 -type f -exec rm -f {} +
+
+  # Moves the packed ones to the output directory
   mv "$TARGET_DIR"/* "$FILES_DIR"
+
+  # Removes the packed directory
   rm -rf "$TARGET_DIR"
 fi

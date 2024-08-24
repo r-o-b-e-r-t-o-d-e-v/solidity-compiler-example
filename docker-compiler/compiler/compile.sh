@@ -110,6 +110,24 @@ if [ -z "$CONTRACTS_DIR_RELATIVE_PATH" ]; then
   echo " >> No contracts directory was set. Using default one: $CONTRACTS_DIR_DEFAULT"
 else
   CONTRACTS_DIR="$(pwd)/${CONTRACTS_DIR_RELATIVE_PATH#./}"
+
+  TEMP_CONTRACTS_DIR=$(cd $(pwd)/${CONTRACTS_DIR_RELATIVE_PATH#./} && pwd)
+  if [ $? -ne 0 ]; then
+    echo " >> Invalid contracts directory path"
+    exit 1
+  fi
+
+  CONTRACTS_DIR="$(cd $TEMP_CONTRACTS_DIR; pwd )"
+
+  if [ "$(basename $CONTRACTS_DIR)" != "contracts" ]; then
+    CONTRACTS_DIR="$CONTRACTS_DIR/contracts"
+  fi
+
+  if [ ! -d "$CONTRACTS_DIR" ]; then
+    echo " >> Invalid contracts directory path"
+    exit 1
+  fi
+
   echo " >> Set contracts directory to: $CONTRACTS_DIR"
 fi
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
@@ -120,7 +138,17 @@ fi
 if [ -z "$OUTPUT_DIR_RELATIVE_PATH" ]; then
   echo " >> No output directory was set. Using default one: $OUTPUT_DIR_DEFAULT"
 else
-  OUTPUT_DIR="$(pwd)/${OUTPUT_DIR_RELATIVE_PATH#./}"
+
+  TEMP_OUTPUT_DIR_ABSOLUTE="$(pwd | sed 's:/*$::')/${OUTPUT_DIR_RELATIVE_PATH#./}"
+  TEMP_OUTPUT_DIR_ABSOLUTE="${TEMP_OUTPUT_DIR_ABSOLUTE%.}"
+  TEMP_OUTPUT_DIR_NAME="$(basename $TEMP_OUTPUT_DIR_ABSOLUTE)"
+
+  if [ "$TEMP_OUTPUT_DIR_NAME" != "output" ]; then
+    OUTPUT_DIR="${TEMP_OUTPUT_DIR_ABSOLUTE%/}/output"
+  else
+    OUTPUT_DIR="$TEMP_OUTPUT_DIR_ABSOLUTE"
+  fi
+
   echo " >> Set output directory to: $OUTPUT_DIR"
 fi
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
@@ -133,9 +161,6 @@ if [ "$PACK_OUTPUT" == "false" ] && [ "$KEEP_UNPACKED_FILES" == "true" ]; then
   exit 1
 fi
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
-
-
-rm -rf "$OUTPUT_DIR"
 
 
 # Running the script to do the actual contracts compilation
