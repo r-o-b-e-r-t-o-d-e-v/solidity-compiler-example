@@ -1,5 +1,6 @@
 #!/bin/sh
 
+
 # Accepted args:
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 #
@@ -81,7 +82,7 @@ while [ $# -gt 0 ]; do
         CONTRACTS_DIR_RELATIVE_PATH="$2"
         shift 2
       else
-        echo "Error: -c requires a non-empty option argument."
+        echo " >> Error: -c requires a non-empty option argument."
         exit 1
       fi
       ;;
@@ -90,12 +91,12 @@ while [ $# -gt 0 ]; do
         OUTPUT_DIR_RELATIVE_PATH="$2"
         shift 2
       else
-        echo "Error: -o requires a non-empty option argument."
+        echo " >> Error: -o requires a non-empty option argument."
         exit 1
       fi
       ;;
     *)
-      echo "Unknown argument: $1"
+      echo " >> Unknown argument: $1"
       exit 1
       ;;
   esac
@@ -106,11 +107,10 @@ done
 # Solving contracts directory
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 if [ -z "$CONTRACTS_DIR_RELATIVE_PATH" ]; then
-  echo "No contracts directory was set. Using default one: $CONTRACTS_DIR_DEFAULT"
+  echo " >> No contracts directory was set. Using default one: $CONTRACTS_DIR_DEFAULT"
 else
   CONTRACTS_DIR="$(pwd)/${CONTRACTS_DIR_RELATIVE_PATH#./}"
-  echo "CONTRACTS_DIR_RELATIVE_PATH:: $CONTRACTS_DIR_RELATIVE_PATH"
-  echo "Set contracts directory to: $CONTRACTS_DIR"
+  echo " >> Set contracts directory to: $CONTRACTS_DIR"
 fi
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
@@ -118,11 +118,10 @@ fi
 # Solving output directory
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 if [ -z "$OUTPUT_DIR_RELATIVE_PATH" ]; then
-  echo "No output directory was set. Using default one: $OUTPUT_DIR_DEFAULT"
+  echo " >> No output directory was set. Using default one: $OUTPUT_DIR_DEFAULT"
 else
   OUTPUT_DIR="$(pwd)/${OUTPUT_DIR_RELATIVE_PATH#./}"
-  echo "OUTPUT_DIR_RELATIVE_PATH:: $OUTPUT_DIR_RELATIVE_PATH"
-  echo "Set output directory to: $OUTPUT_DIR"
+  echo " >> Set output directory to: $OUTPUT_DIR"
 fi
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
@@ -130,7 +129,7 @@ fi
 # Args validation
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 if [ "$PACK_OUTPUT" == "false" ] && [ "$KEEP_UNPACKED_FILES" == "true" ]; then
-  echo "Argument --keep-unpacked can only be using along with --pack."
+  echo " >> Argument --keep-unpacked can only be using along with --pack."
   exit 1
 fi
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
@@ -143,6 +142,7 @@ rm -rf "$OUTPUT_DIR"
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 $SCRIPT_DIR/scripts/compile-contracts.sh -c "$CONTRACTS_DIR" -o "$OUTPUT_DIR"
 if [ $? -ne 0 ]; then
+  echo " >> Compilation process went wrong."
   exit 1
 fi
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
@@ -152,9 +152,16 @@ fi
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 if [ "$PACK_OUTPUT" == "true" ]; then
   if [ "$KEEP_UNPACKED_FILES" == "true" ]; then
-    $SCRIPT_DIR/scripts/pack-output.sh --keep-unpacked
+    $SCRIPT_DIR/scripts/pack-output.sh --keep-unpacked -o "$OUTPUT_DIR"
   else
-    $SCRIPT_DIR/scripts/pack-output.sh
+    $SCRIPT_DIR/scripts/pack-output.sh -o "$OUTPUT_DIR"
   fi
 fi
+
+if [ $? -ne 0 ]; then
+  echo " >> Something went wrong when packing the compile generated files."
+  exit 1
+fi
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+exit 0

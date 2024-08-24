@@ -29,7 +29,7 @@ while [ $# -gt 0 ]; do
         SOURCES_DIR="$2"
         shift 2
       else
-        echo "Error: -o requires a non-empty option argument."
+        echo " >> Error: -o requires a non-empty option argument."
         exit 1
       fi
       ;;
@@ -38,12 +38,12 @@ while [ $# -gt 0 ]; do
         OUTPUT_DIR="$2"
         shift 2
       else
-        echo "Error: -o requires a non-empty option argument."
+        echo " >> Error: -o requires a non-empty option argument."
         exit 1
       fi
       ;;
     *)
-      echo "Unknown argument: $1"
+      echo " >> Unknown argument: $1"
       exit 1
       ;;
   esac
@@ -54,12 +54,12 @@ done
 # Args validation
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 if [ -z "$SOURCES_DIR" ]; then
-  echo "No sources directory was specified"
+  echo " >> No sources directory was specified"
   exit 1
 fi
 
 if [ -z "$OUTPUT_DIR" ]; then
-  echo "No output directory was specified ($0)"
+  echo " >> No output directory was specified ($0)"
   exit 1
 fi
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
@@ -68,7 +68,7 @@ fi
 # Quick checking to make sure Docker is running
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 if ! docker info > /dev/null 2>&1; then
-    echo "Docker daemon is not running. Please start Docker and try again."
+    echo " >> Docker daemon is not running. Please start Docker and try again."
     exit 1
 fi
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---

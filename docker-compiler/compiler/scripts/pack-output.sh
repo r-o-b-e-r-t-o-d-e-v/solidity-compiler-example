@@ -2,24 +2,60 @@
 
 PACK_SH_VERSION="1.0.0"
 
-FILES_DIR="$(pwd)/contracts/output"
-TARGET_DIR="$FILES_DIR/packed"
 
-# Default value for KEEP_UNPACKED_FILES
-KEEP_UNPACKED_FILES="false"
+# Accepted args:
+# --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+#
+# -o <output_folder>      Param to set the location of the output
+#                         folder the compile files will be generated at.
+#
+#                         If not specified, the script will exit.
+#                         This arg expects the path to be absolute,
+#                         no matter the execution context.
+#
+# --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
-# Parse command-line arguments
-for arg in "$@"; do
-  case $arg in --keep-unpacked)
+
+# ARGS
+# --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --keep-unpacked)
       KEEP_UNPACKED_FILES="true"
       shift
       ;;
+    -o)
+      if [ -n "$2" ]; then
+        OUTPUT_DIR="$2"
+        shift 2
+      else
+        echo " >> Error: -o requires a non-empty option argument."
+        exit 1
+      fi
+      ;;
     *)
-      echo "Unknown argument: $arg"
+      echo " >> Unknown argument: $1"
       exit 1
       ;;
   esac
 done
+# --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+
+# Args validation
+# --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+if [ -z "$OUTPUT_DIR" ]; then
+  echo " >> No output directory was specified ($0)"
+  exit 1
+fi
+# --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+
+FILES_DIR="$OUTPUT_DIR"
+TARGET_DIR="$FILES_DIR/packed"
+
+# Default value for KEEP_UNPACKED_FILES
+KEEP_UNPACKED_FILES="false"
 
 mkdir -p "$TARGET_DIR"
 
@@ -46,7 +82,7 @@ for abi_file in "$FILES_DIR"/*.abi; do
   echo "  \"bin\": \"$bin_content\"" >> "$output_file"
   echo "}" >> "$output_file"
 
-  echo "Generated $output_file"
+  echo " >> Generated $output_file"
 done
 
 if [ "$KEEP_UNPACKED_FILES" == "false" ]; then
