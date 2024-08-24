@@ -13,6 +13,10 @@ PACK_SH_VERSION="1.0.0"
 #                         This arg expects the path to be absolute,
 #                         no matter the execution context.
 #
+# --keep-unpacked         Flag to tell the script if when packing
+#                         the compiled files should also keep the
+#                         original ones.
+#
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
 
