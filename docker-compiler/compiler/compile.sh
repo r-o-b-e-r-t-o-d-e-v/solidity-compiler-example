@@ -1,9 +1,36 @@
 #!/bin/sh
 
 
-# Constants
+# ARGS
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
-SCRIPT_DIR=$(dirname "$(realpath "$0")")
+PACK_OUTPUT="false"
+KEEP_UNPACKED_FILES="false"
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --pack)
+      PACK_OUTPUT="true"
+      shift
+      ;;
+    --keep-unpacked)
+      KEEP_UNPACKED_FILES="true"
+      shift
+      ;;
+    *)
+      echo "Unknown argument: $1"
+      exit 1
+      ;;
+  esac
+done
+# --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+
+# Args validation
+# --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+if [ "$PACK_OUTPUT" == "false" ] && [ "$KEEP_UNPACKED_FILES" == "true" ]; then
+  echo "Argument --keep-unpacked can only be using along with --pack."
+  exit 1
+fi
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
 
@@ -22,4 +49,16 @@ fi
 # in the same compilation process.
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 $SCRIPT_DIR/scripts/rename-contracts.sh
+# --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+
+# Running the script to pack the contracts compiled files
+# --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+if [ "$PACK_OUTPUT" == "true" ]; then
+  if [ "$KEEP_UNPACKED_FILES" == "true" ]; then
+    $SCRIPT_DIR/scripts/pack-output.sh --keep-unpacked
+  else
+    $SCRIPT_DIR/scripts/pack-output.sh
+  fi
+fi
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
