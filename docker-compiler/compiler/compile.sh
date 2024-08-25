@@ -47,18 +47,6 @@ SCRIPT_DIR=$(dirname "$(realpath "$0")")
 # Establish a default directory for contracts by finding any folder with that name in subdirectories
 CONTRACTS_DIR_DEFAULT=$(find $(pwd) -type d -name 'contracts' -print)
 CONTRACTS_DIR="$CONTRACTS_DIR_DEFAULT"
-
-# ---  .  ---  .  ---  .  ---  .  ---  .  ---
-
-# Establish a default directory for output by finding any folder with that name in subdirectories
-OUTPUT_DIR_DEFAULT=$(find $(pwd) -type d -name 'output' -print)
-
-# If no output folder exists, creates a default path based on the contracts folder location
-if [ -z "$OUTPUT_DIR_DEFAULT" ]; then
-    OUTPUT_DIR_DEFAULT="$CONTRACTS_DIR_DEFAULT/output"
-fi
-
-OUTPUT_DIR="$OUTPUT_DIR_DEFAULT"
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
 
@@ -109,22 +97,17 @@ done
 if [ -z "$CONTRACTS_DIR_RELATIVE_PATH" ]; then
   echo " >> No contracts directory was set. Using default one: $CONTRACTS_DIR_DEFAULT"
 else
-  CONTRACTS_DIR="$(pwd)/${CONTRACTS_DIR_RELATIVE_PATH#./}"
+  CONTEXT_ABSOLUTE_PATH="$(pwd)"
 
-  TEMP_CONTRACTS_DIR=$(cd $(pwd)/${CONTRACTS_DIR_RELATIVE_PATH#./} && pwd)
-  if [ $? -ne 0 ]; then
-    echo " >> Invalid contracts directory path"
-    exit 1
-  fi
+  # Normalize CONTRACTS_DIR_RELATIVE_PATH and determine the final path
+  contracts_dir_absolute_path="${CONTEXT_ABSOLUTE_PATH}/${CONTRACTS_DIR_RELATIVE_PATH}"
 
-  CONTRACTS_DIR="$(cd $TEMP_CONTRACTS_DIR; pwd )"
+  # Remove any potential double slashes
+  contracts_dir_absolute_path=$(echo "$contracts_dir_absolute_path" | sed 's://*:/:g')
 
-  if [ "$(basename $CONTRACTS_DIR)" != "contracts" ]; then
-    CONTRACTS_DIR="$CONTRACTS_DIR/contracts"
-  fi
-
-  if [ ! -d "$CONTRACTS_DIR" ]; then
-    echo " >> Invalid contracts directory path"
+  CONTRACTS_DIR="$(cd $contracts_dir_absolute_path 2>/dev/null && pwd)"
+  if [ -z "$CONTRACTS_DIR" ]; then
+    echo " >> Specified contracts directory does not exists ($CONTRACTS_DIR_RELATIVE_PATH)"
     exit 1
   fi
 
@@ -133,22 +116,44 @@ fi
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
 
+# Default output directory
+# --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+# Establish a default directory for output by finding any folder with that name in subdirectories
+OUTPUT_DIR_DEFAULT=$(find $(pwd) -type d -name 'output' -print)
+
+# If no output folder exists, creates a default path based on the contracts folder location
+if [ -z "$OUTPUT_DIR_DEFAULT" ]; then
+    OUTPUT_DIR_DEFAULT="$CONTRACTS_DIR/output"
+fi
+
+OUTPUT_DIR="$OUTPUT_DIR_DEFAULT"
+# --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+
 # Solving output directory
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 if [ -z "$OUTPUT_DIR_RELATIVE_PATH" ]; then
   echo " >> No output directory was set. Using default one: $OUTPUT_DIR_DEFAULT"
 else
+  CONTEXT_ABSOLUTE_PATH="$(pwd)"
+  OUTPUT_NAME="output"
 
-  TEMP_OUTPUT_DIR_ABSOLUTE="$(pwd | sed 's:/*$::')/${OUTPUT_DIR_RELATIVE_PATH#./}"
-  TEMP_OUTPUT_DIR_ABSOLUTE="${TEMP_OUTPUT_DIR_ABSOLUTE%.}"
-  TEMP_OUTPUT_DIR_NAME="$(basename $TEMP_OUTPUT_DIR_ABSOLUTE)"
-
-  if [ "$TEMP_OUTPUT_DIR_NAME" != "output" ]; then
-    OUTPUT_DIR="${TEMP_OUTPUT_DIR_ABSOLUTE%/}/output"
+  # Normalize OUTPUT_DIR_RELATIVE_PATH and determine the final path
+  if [ "${OUTPUT_DIR_RELATIVE_PATH: -1}" = "/" ]; then
+    result="${CONTEXT_ABSOLUTE_PATH}/${OUTPUT_DIR_RELATIVE_PATH}${OUTPUT_NAME}"
   else
-    OUTPUT_DIR="$TEMP_OUTPUT_DIR_ABSOLUTE"
+    base_path="${CONTEXT_ABSOLUTE_PATH}/${OUTPUT_DIR_RELATIVE_PATH}"
+    if [ -d "$base_path" ]; then
+      result="${base_path}/${OUTPUT_NAME}"
+    else
+      result="$base_path"
+    fi
   fi
 
+  # Remove any potential double slashes
+  result=$(echo "$result" | sed 's://*:/:g')
+
+  OUTPUT_DIR="$result"
   echo " >> Set output directory to: $OUTPUT_DIR"
 fi
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---

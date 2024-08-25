@@ -77,6 +77,13 @@ fi
 # Build the metadata param values with all the contracts to be compiled
 # This is basically to add several contracts to be compiled at the same time
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+# Check if there are any .sol files in the directory
+if [ -z "$(ls -A "$SOURCES_DIR"/*.sol 2>/dev/null)" ]; then
+  echo " >> Error: No .sol files were found in '$SOURCES_DIR'."
+  exit 1
+fi
+
 metadata_args=""
 for file in "$SOURCES_DIR"/*.sol; do
   metadata_args+=" /sources/$(basename "$file")"
