@@ -118,22 +118,15 @@ fi
 
 # Default output directory
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
-# Establish a default directory for output by finding any folder with that name in subdirectories
-OUTPUT_DIR_DEFAULT=$(find $(pwd) -type d -name 'output' -print)
-
-# If no output folder exists, creates a default path based on the contracts folder location
-if [ -z "$OUTPUT_DIR_DEFAULT" ]; then
-    OUTPUT_DIR_DEFAULT="$CONTRACTS_DIR/output"
-fi
-
-OUTPUT_DIR="$OUTPUT_DIR_DEFAULT"
+# Establish a default directory based on the contracts folder location
+OUTPUT_DIR="$CONTRACTS_DIR/output"
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
 
 # Solving output directory
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 if [ -z "$OUTPUT_DIR_RELATIVE_PATH" ]; then
-  echo " >> No output directory was set. Using default one: $OUTPUT_DIR_DEFAULT"
+  echo " >> No output directory was set. Using default one: $OUTPUT_DIR"
 else
   CONTEXT_ABSOLUTE_PATH="$(pwd)"
   OUTPUT_NAME="output"

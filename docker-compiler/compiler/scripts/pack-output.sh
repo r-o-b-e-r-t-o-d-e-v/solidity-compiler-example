@@ -20,6 +20,13 @@ PACK_SH_VERSION="1.0.0"
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
 
+# Constants
+# --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+# Default value for KEEP_UNPACKED_FILES
+KEEP_UNPACKED_FILES="false"
+# --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+
 # ARGS
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 while [ $# -gt 0 ]; do
@@ -55,12 +62,14 @@ fi
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
 
+# --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 FILES_DIR="$OUTPUT_DIR"
 TARGET_DIR="$FILES_DIR/packed"
+# --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
-# Default value for KEEP_UNPACKED_FILES
-KEEP_UNPACKED_FILES="false"
 
+# Generate packed files
+# --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 # Creates the directory for packed files
 mkdir -p "$TARGET_DIR"
 
@@ -89,7 +98,11 @@ for abi_file in "$FILES_DIR"/*.abi; do
 
   echo " >> Generated $output_file"
 done
+# --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
+
+# Removing originals based on argument
+# --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 # If there is no flag to keep the original files, it removes them
 if [ "$KEEP_UNPACKED_FILES" == "false" ]; then
 
@@ -102,3 +115,4 @@ if [ "$KEEP_UNPACKED_FILES" == "false" ]; then
   # Removes the packed directory
   rm -rf "$TARGET_DIR"
 fi
+# --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
